@@ -130,7 +130,7 @@ class Ui_MainWindow(object):
         self.main_image_height = 700
         self.main_image = Image.new('RGB', (self.main_image_width, self.main_image_height), (118, 255, 97))
 
-        self.image = Image.open('image/Image0.png')
+        self.image = Image.open('image/Image.png')
 
         self.width, self.height = self.image.size
 
@@ -143,6 +143,7 @@ class Ui_MainWindow(object):
         self.assist_image.paste(self.image, (0, 0), self.image)
         # self.assist_image.show()
         self.pixels = self.assist_image.load()
+        print("//", self.assist_image.size)
         self.main_image_matrix = [[0 for i in range(self.main_image_width)] for j in range(self.main_image_height)]
 
         #  # --------------------testing--------------------
@@ -212,8 +213,10 @@ class Ui_MainWindow(object):
 
         # ---maximum possible quality of small images in big main image---
         possible_quality = (1200 * 700) // self.image_square
-        # self.assist_image = self.assist_image.crop(
-        # (upper_left_coord[0], upper_left_coord[1], lower_right_coord[0], lower_right_coord[1]))
+        self.assist_image = self.assist_image.crop(
+        (upper_left_coord[0], upper_left_coord[1], lower_right_coord[0], lower_right_coord[1]))
+        self.image = self.image.crop(
+        (upper_left_coord[0], upper_left_coord[1], lower_right_coord[0], lower_right_coord[1]))
         # self.assist_image.show()
         print(f'''Possible quality: {possible_quality}
 ''')
@@ -231,7 +234,7 @@ class Ui_MainWindow(object):
         flip_degrees = [0, 90, 180, 270]
         degrees = choice(flip_degrees)
         self.image = self.image.rotate(0, expand=True)
-        # self.assist_image = self.assist_image.rotate(degrees, expand=True)
+        self.assist_image = self.assist_image.rotate(degrees, expand=True)
         # self.assist_image.show()
         self.image.show()
         print(
@@ -242,6 +245,12 @@ New random flip degrees: {degrees}
         # ------------------------------------------------------------------------------------------
         # --------------------------------------TABLE CREATING--------------------------------------
         # ------------------------------------------------------------------------------------------
+        self.pixels = self.assist_image.load()
+        self.assist_image.show()
+        self.image.show()
+        self.width, self.height = self.image.size
+        print(f"ERROR: {self.pixels}")
+        print(self.width, self.height, "//", self.assist_image.size)
 
         self.image_matrix = [[0 for i in range(self.width)] for j in range(self.height)]
         for i in range(self.width):
@@ -256,33 +265,31 @@ New random flip degrees: {degrees}
         # ------------------------------------------------------------------------------------------
         # transferring little matrix to big one for checking overlaying
 
-        overlay = False
-        copied_main_matrix = self.main_image_matrix  # for case, if it's overlay (or another error)
-        for i in range(self.main_image_width):
-            for j in range(self.main_image_height):
-                # checking scale
-                if i >= self.coords_on_surf[0] and j >= self.coords_on_surf[1] and \
-                        i - self.coords_on_surf[0] < self.width and j - self.coords_on_surf[1] < self.height:
-                    i_for_image = i - self.coords_on_surf[0]  # because i and j can be different
-                    j_for_image = j - self.coords_on_surf[1]
-                    # if not overlay
-                    print(i_for_image, j_for_image, self.width, self.height, ';;;;;;')
-                    print((i, j), self.coords_on_surf)
-                    print(self.main_image_matrix[i][j])
-                    if not (self.main_image_matrix[i][j] == self.image_matrix[i_for_image][j_for_image] \
-                            and self.main_image_matrix[i][j] == 1):
-                        self.main_image_matrix[i][j] = self.image_matrix[i_for_image][j_for_image]  # transferring
-                    else:
-                        overlay = True
-                        print("WHAAAAAAAAAAAAT")
-                if overlay:
-                    break
-        if not overlay:
-            self.main_image.paste(self.image, (0, 0), self.image)
-        self.main_image.show()
+        # overlay = False
+        # copied_main_matrix = self.main_image_matrix  # for case, if it's overlay (or another error)
+        # for i in range(self.main_image_width):
+        #     for j in range(self.main_image_height):
+        #         # checking scale
+        #         if i >= self.coords_on_surf[0] and j >= self.coords_on_surf[1] and \
+        #                 i - self.coords_on_surf[0] < self.width and j - self.coords_on_surf[1] < self.height:
+        #             i_for_image = i - self.coords_on_surf[0]  # because i and j can be different
+        #             j_for_image = j - self.coords_on_surf[1]
+        #             # if not overlay
+        #             print(i_for_image, j_for_image, self.width, self.height, ';;;;;;')
+        #             print((i, j), self.coords_on_surf)
+        #             print(self.main_image_matrix[i][j])
+        #             if not (self.main_image_matrix[i][j] == self.image_matrix[i_for_image][j_for_image] \
+        #                     and self.main_image_matrix[i][j] == 1):
+        #                 self.main_image_matrix[i][j] = self.image_matrix[i_for_image][j_for_image]  # transferring
+        #             else:
+        #                 overlay = True
+        #                 print("WHAAAAAAAAAAAAT")
+        #         if overlay:
+        #             break
+        # if not overlay:
+        #     self.main_image.paste(self.image, (0, 0), self.image)
+        # self.main_image.show()
 
-    def get_index_error_value(self):
-        return
 
 
 if __name__ == "__main__":
