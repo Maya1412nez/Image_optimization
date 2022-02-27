@@ -1,0 +1,27 @@
+        overlay = False
+        copied_main_matrix = self.main_image_matrix  # for case, if it's overlay (or another error)
+        for i in range(self.main_image_width):
+            for j in range(self.main_image_height):
+                # checking scale
+                if i >= self.coords_on_surf[0] and j >= self.coords_on_surf[1] and \
+                        i - self.coords_on_surf[0] < self.width and j - self.coords_on_surf[1] < self.height:
+                    i_for_image = i - self.coords_on_surf[0]  # because i and j can be different
+                    j_for_image = j - self.coords_on_surf[1]
+                    # if not overlay
+                    print(i_for_image, j_for_image, self.width, self.height, ';;;;;;')
+                    print((i, j), self.coords_on_surf)
+                    
+                    if self.main_image_matrix[i][j] != self.image_matrix[i_for_image][j_for_image] \
+                            and self.main_image_matrix[i][j] != 1:
+                        self.main_image_matrix[i][j] = self.image_matrix[i_for_image][j_for_image]  # transferring
+                    else:
+                        overlay = True
+                        print("WHAAAAAAAAAAAAT")
+                if overlay:
+                    break
+        if not overlay:
+            self.main_image.paste(self.image, (0, 0), self.image)
+        self.main_image.show()
+
+    def get_index_error_value(self):
+        return
