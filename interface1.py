@@ -212,8 +212,8 @@ class Ui_MainWindow(object):
 
         # ---maximum possible quality of small images in big main image---
         possible_quality = (1200 * 700) // self.image_square
-        # self.assist_image = self.assist_image.crop(
-        # (upper_left_coord[0], upper_left_coord[1], lower_right_coord[0], lower_right_coord[1]))
+        self.assist_image = self.assist_image.crop(
+         (upper_left_coord[0], upper_left_coord[1], lower_right_coord[0], lower_right_coord[1]))
         # self.assist_image.show()
         print(f'''Possible quality: {possible_quality}
 ''')
@@ -231,26 +231,25 @@ class Ui_MainWindow(object):
         flip_degrees = [0, 90, 180, 270]
         degrees = choice(flip_degrees)
         self.image = self.image.rotate(degrees, expand=True)
-        # self.assist_image = self.assist_image.rotate(degrees, expand=True)
-        # self.assist_image.show()
+        self.assist_image = self.assist_image.rotate(degrees, expand=True)
+        self.assist_image.show()
         self.image.show()
         print(
             f'''New random coordinates: {self.coords_on_surf}
 New random flip degrees: {degrees}
 ''')
+        self.width, self.height = self.assist_image.size
+        self.pixels = self.assist_image.load()
+        print(self.assist_image.size)
 
-        # ------------------------------------------------------------------------------------------
-        # --------------------------------------TABLE CREATING--------------------------------------
-        # ------------------------------------------------------------------------------------------
-
-        self.image_matrix = [[0 for i in range(self.width)] for j in range(self.height)]
+        self.image_matrix = [[0 for i in range(self.height)] for j in range(self.width)]
         for i in range(self.width):
             for j in range(self.height):
                 r, g, b = self.pixels[i, j]
                 if r != 118 and g != 255 and b != 97:  # if pix not green = if pix != None
                     self.image_matrix[i][j] = 1
                     print(i, j, self.width, self.height)
-        # print(self.image_matrix)
+        print(self.image_matrix)
 
 
 if __name__ == "__main__":
