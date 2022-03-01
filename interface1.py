@@ -266,23 +266,16 @@ New random flip degrees: {degrees}
                     i_for_image = i - self.coords_on_surf[0]  # because i and j can be different
                     j_for_image = j - self.coords_on_surf[1]
                     # if not overlay
-                    print(i_for_image, j_for_image, self.width, self.height, ';;;;;;')
-                    print((i, j), self.coords_on_surf)
-                    print(self.main_image_matrix[i][j])
                     if not (self.main_image_matrix[i][j] == self.image_matrix[i_for_image][j_for_image]
                             and self.main_image_matrix[i][j] == 1):
                         self.main_image_matrix[i][j] = self.image_matrix[i_for_image][j_for_image]  # transferring
                     else:
                         overlay = True
-                        print("WHAAAAAAAAAAAAT")
                 if overlay:
                     break
         if not overlay:
             self.main_image.paste(self.image, (0, 0), self.image)
         self.main_image.show()
-
-    def get_index_error_value(self):
-        return
 
 
 if __name__ == "__main__":
