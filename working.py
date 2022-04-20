@@ -141,7 +141,7 @@ class Ui_MainWindow(object):
         self.assist_image = Image.new('RGB', (self.width, self.height),
                                       (118, 255, 97))  # assist image = green bg + editing image
         self.assist_image.paste(self.image, (0, 0), self.image)
-        self.assist_image.show()
+        # self.assist_image.show()
         self.pixels = self.assist_image.load()
         self.main_image_matrix = [[0 for i in range(self.main_image_height)] for j in range(self.main_image_width)]
 
@@ -196,10 +196,10 @@ class Ui_MainWindow(object):
         # ---maximum possible quality of small images in big main image---
         possible_quality = (1200 * 700) // self.image_square
         self.assist_image = self.assist_image.crop(
-        (upper_left_coord[0], upper_left_coord[1], lower_right_coord[0], lower_right_coord[1]))
+            (upper_left_coord[0], upper_left_coord[1], lower_right_coord[0], lower_right_coord[1]))
         self.image = self.image.crop(
             (upper_left_coord[0], upper_left_coord[1], lower_right_coord[0], lower_right_coord[1]))
-        self.assist_image.show()
+        # self.assist_image.show()
         print(f'''Possible quality: {possible_quality}
 ''')
 
@@ -207,42 +207,50 @@ class Ui_MainWindow(object):
         pixmap = QPixmap('image/Image.png')
         self.main_image_label.setPixmap(pixmap)
 
+        #
+        #
+        #
+        #
+        #
         # ------------------------------------------------------------------------------------------
         # --------------------------------------RANDOM EDITING--------------------------------------
         # ------------------------------------------------------------------------------------------
 
-        self.coords_on_surf = (
-            randint(0, self.main_image_width - self.width), randint(0, self.main_image_height - self.height))
-        flip_degrees = [0, 90, 180, 270]
-        degrees = choice(flip_degrees)
-        self.image = self.image.rotate(degrees, expand=True)
-        self.assist_image = self.assist_image.rotate(degrees, expand=True)
-        self.assist_image.show()
+        flip_degrees = [0, 90, 180, 270]  # список градусов поворота
+        degrees = choice(flip_degrees)  # выбор градуса поворота
+
+        self.image = self.image.rotate(degrees, expand=True)  # поворот PNG изображения
+        self.assist_image = self.assist_image.rotate(
+            degrees,
+            expand=True)  # поворот того же изображения, но наложенного на зеленый фон (r = 118 and g = 255 and b = 97)
+        # self.assist_image.show()
         self.image.show()
+        self.width, self.height = self.image.size  # переопределение размеров
+        self.cords = (randint(0, self.main_image_width - self.width)), (self.main_image_height - self.height)
+        x, y = 200, (self.main_image_height - self.height)
         print(
-            f'''New random coordinates: {self.coords_on_surf}
-New random flip degrees: {degrees}
-''')
+            f'''New random coordinates: {x, y}
+    New random flip degrees: {degrees}
+    ''')
 
         # ------------------------------------------------------------------------------------------
         # --------------------------------------TABLE CREATING--------------------------------------
         # ------------------------------------------------------------------------------------------
 
-        self.image_matrix = [[0 for i in range(self.height)] for j in range(self.width)]
-        for i in range(self.width):
-            for j in range(self.height):
-                r, g, b = self.pixels[i, j]
+        pixels = self.assist_image.load()
+        self.image_matrix = [[0 for i in range(self.height)] for j in
+                             range(self.width)]  # создание матрицы с нулями
+        for i in range(self.height):
+            for j in range(self.width):
+                r, g, b = pixels[j, i]
                 if r != 118 and g != 255 and b != 97:  # if pix not green = if pix != None
-                    self.image_matrix[i][j] = 1
+                    self.image_matrix[j][i] = 1  # замена 0 на 1
         print(self.image_matrix)
-        self.image.save('aaaa.png')
 
         # ------------------------------------------------------------------------------------------
         # -----------------------------------MAIN MATRIX UPDATING-----------------------------------
         # ------------------------------------------------------------------------------------------
         # transferring little matrix to big one for checking overlaying
-
-
 
 
 if __name__ == "__main__":
@@ -256,7 +264,7 @@ if __name__ == "__main__":
     ui.setupUi(MainWindow)
     ui.set_image()
 
-    #MainWindow.show()
+    # MainWindow.show()
     sys.exit(app.exec_())
 # except IndexError:
 #     print()
