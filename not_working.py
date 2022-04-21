@@ -227,7 +227,9 @@ class Ui_MainWindow(object):
         self.assist_image.show()
         # self.image.show()
         self.width, self.height = self.image.size  # переопределение размеров
+        print(self.image.size)
         x, y = (randint(0, self.main_image_width - self.width)), (self.main_image_height - self.height)
+        print(x, y)
         # x, y = 10, (self.main_image_height - self.height)
         print(
             f'''New random coordinates: {x, y}
@@ -239,58 +241,41 @@ class Ui_MainWindow(object):
         # ------------------------------------------------------------------------------------------
 
         pixels = self.assist_image.load()
-        self.image_matrix = [[0 for i in range(self.height)] for j in
-                             range(self.width)]  # создание матрицы с нулями
+        self.image_matrix = [[0] * self.width for i in range(self.height)]  # создание матрицы с нулями
         for i in range(self.height):
             for j in range(self.width):
-                r, g, b = pixels[i, j]
+                r, g, b = pixels[j, i]
                 if r != 118 and g != 255 and b != 97:  # if pix not green = if pix != None
                     self.image_matrix[i][j] = 1  # замена 0 на 1
-        print(self.image_matrix)
+        print(*self.image_matrix, sep='\n')
 
         # ------------------------------------------------------------------------------------------
         # -----------------------------------MAIN MATRIX UPDATING-----------------------------------
         # ------------------------------------------------------------------------------------------
         # transferring little matrix to big one for checking overlaying
-        #
-        # copied_matrix = self.main_image_matrix
-        # good_height = False
-        # self.image_quality = 0
-        # while y >= 0 and not good_height:
-        #     overlay = False
-        #     fail_counter = 0
-        #     count = 0
-        #     for j in range(self.main_image_width):
-        #         for i in range(self.main_image_height):
-        #             # вход в обработку матрицы
-        #             if x <= j < x + self.width and y < i < y + self.height:
-        #                 new_j, new_i = j - x, i - y
-        #                 print(y)
-        #                 #print(i, x, j, y, new_i, new_j)
-        #                 if self.main_image_matrix[j][i] == self.image_matrix[new_j][new_i] == 1:
-        #                     overlay = True
-        #                     count += 1
-        #                 else:
-        #                     self.main_image_matrix[j][i] = self.image_matrix[new_j][new_i]
-        #
-        #
-        #     if overlay:
-        #         y -= 1
-        #         self.main_image_matrix = copied_matrix
-        #         fail_counter += 1
-        #         print(count)
-        #         overlay = False
-        #     else:
-        #         good_height = True
-        #         self.main_image.paste(self.image, (x, y), self.image)
-        #         fail_counter = 0
-        #         self.image_quality += 1
-        #         print('OK')
-        # if y < 0:
-        #     print('pisez')
-        #     print(self.main_image_matrix)
-        # self.main_image.show()
 
+        matrix_copy = self.main_image_matrix
+        good_height = False
+        im_qual = 0
+        while not good_height:
+            overlay = False
+            fail_count = 0
+            if y >= 0:
+                for i in range(self.main_image_width):
+                    for j in range(self.main_image_height):
+                        #print(y + self.height)
+                # ENTER
+                        if x <= i and y <= j and x + self.width > i and y + self.height > j:
+                            small_i = i - x
+                            small_j = j - y
+                            print(i, x, small_i, 'X')
+                            print(j, y, small_j, 'Y')
+                            if self.main_image_matrix[i][j] == self.image_matrix[small_i][small_j] == 1:
+                                
+                                print(1)
+
+
+            print("NOT GOOD HEIGHT")
 
 if __name__ == "__main__":
     # try:
