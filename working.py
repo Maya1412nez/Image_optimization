@@ -199,7 +199,7 @@ class Ui_MainWindow(object):
             (upper_left_coord[0], upper_left_coord[1], lower_right_coord[0], lower_right_coord[1]))
         self.image = self.image.crop(
             (upper_left_coord[0], upper_left_coord[1], lower_right_coord[0], lower_right_coord[1]))
-        self.assist_image.show()
+        # self.assist_image.show()
         print(f'''Possible quality: {possible_quality}
 ''')
 
@@ -212,7 +212,6 @@ class Ui_MainWindow(object):
         #
         #
         #
-        # for i in range(2):
         # ------------------------------------------------------------------------------------------
         # --------------------------------------RANDOM EDITING--------------------------------------
         # ------------------------------------------------------------------------------------------
@@ -224,11 +223,11 @@ class Ui_MainWindow(object):
         self.assist_image = self.assist_image.rotate(
             degrees,
             expand=True)  # поворот того же изображения, но наложенного на зеленый фон (r = 118 and g = 255 and b = 97)
-        self.assist_image.show()
-        # self.image.show()
+        # self.assist_image.show()
+        self.image.show()
         self.width, self.height = self.image.size  # переопределение размеров
-        x, y = (randint(0, self.main_image_width - self.width)), (self.main_image_height - self.height)
-        # x, y = 10, (self.main_image_height - self.height)
+        self.cords = (randint(0, self.main_image_width - self.width)), (self.main_image_height - self.height)
+        x, y = 200, (self.main_image_height - self.height)
         print(
             f'''New random coordinates: {x, y}
     New random flip degrees: {degrees}
@@ -239,57 +238,18 @@ class Ui_MainWindow(object):
         # ------------------------------------------------------------------------------------------
 
         pixels = self.assist_image.load()
-        self.image_matrix = [[0 for i in range(self.height)] for j in
-                             range(self.width)]  # создание матрицы с нулями
+        self.image_matrix = [[0] * self.width for i in range(self.height)]  # создание матрицы с нулями
         for i in range(self.height):
             for j in range(self.width):
                 r, g, b = pixels[j, i]
                 if r != 118 and g != 255 and b != 97:  # if pix not green = if pix != None
-                    self.image_matrix[j][i] = 1  # замена 0 на 1
-        print(self.image_matrix)
+                    self.image_matrix[i][j] = 1  # замена 0 на 1
+        print(*self.image_matrix, sep='\n')
 
         # ------------------------------------------------------------------------------------------
         # -----------------------------------MAIN MATRIX UPDATING-----------------------------------
         # ------------------------------------------------------------------------------------------
         # transferring little matrix to big one for checking overlaying
-        #
-        # copied_matrix = self.main_image_matrix
-        # good_height = False
-        # self.image_quality = 0
-        # while y >= 0 and not good_height:
-        #     overlay = False
-        #     fail_counter = 0
-        #     count = 0
-        #     for j in range(self.main_image_width):
-        #         for i in range(self.main_image_height):
-        #             # вход в обработку матрицы
-        #             if x <= j < x + self.width and y < i < y + self.height:
-        #                 new_j, new_i = j - x, i - y
-        #                 print(y)
-        #                 #print(i, x, j, y, new_i, new_j)
-        #                 if self.main_image_matrix[j][i] == self.image_matrix[new_j][new_i] == 1:
-        #                     overlay = True
-        #                     count += 1
-        #                 else:
-        #                     self.main_image_matrix[j][i] = self.image_matrix[new_j][new_i]
-        #
-        #
-        #     if overlay:
-        #         y -= 1
-        #         self.main_image_matrix = copied_matrix
-        #         fail_counter += 1
-        #         print(count)
-        #         overlay = False
-        #     else:
-        #         good_height = True
-        #         self.main_image.paste(self.image, (x, y), self.image)
-        #         fail_counter = 0
-        #         self.image_quality += 1
-        #         print('OK')
-        # if y < 0:
-        #     print('pisez')
-        #     print(self.main_image_matrix)
-        # self.main_image.show()
 
 
 if __name__ == "__main__":
