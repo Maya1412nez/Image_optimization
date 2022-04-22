@@ -258,32 +258,32 @@ class Ui_MainWindow(object):
 
         good_height = False
         im_qual = 0
-        while not good_height:
+        while not good_height and y >= 0:
             overlay = False
             fail_count = 0
-            if y >= 0:
-                for i in range(self.main_image_width):
-                    for j in range(self.main_image_height):
-                        print('BIG', self.main_image_width, self.main_image_height, '==', len(self.main_image_matrix), len(self.main_image_matrix[i]))
-                        #print(y + self.height)
-                        print('i =', i, 'j =', j, 'x =', x, 'y =', y, 'x + self.width = ', x + self.width, 'y + self.height =', y + self.height)
-                        print('count = ', x <= i, y <= j, x + self.width > i, y + self.height > j)
-                        print('MUST BE 0 AND TRUE', i - x, x <= i and y <= j and x + self.width > i and y + self.height > j)
-                        print('MUST BE 0 AND TRUE', j - y,
-                              x <= i and y <= j and x + self.width > i and y + self.height > j)
-                # ENTER
-                        if x <= i and y <= j and x + self.width > i and y + self.height > j:
-                            small_i = i - x
-                            small_j = j - y
-                            print(i, x, small_i, 'X')
-                            print(j, y, small_j, 'Y')
-                            print('SMALL', len(self.image_matrix), len(self.image_matrix[small_i]), '==', self.width, self.height)
-                            if self.main_image_matrix[i][j] == self.image_matrix[small_i][small_j] == 1:
+            for i in range(self.main_image_height):
+                for j in range(self.main_image_width):
+                    # ENTER
+                    small_i = i - y
+                    small_j = j - x
+                    if self.height > small_i >= 0 and self.width > small_j >= 0:
+                        # print('хоть что-то выведи')
+                        print(i, j, small_i, small_j, '??', self.height, self.width)
+                        if self.main_image_matrix[i][j] == self.image_matrix[small_i][small_j] == 1:
+                             overlay = True
+                        else:
+                            self.main_image_matrix[i][j] = self.image_matrix[small_i][small_j]
+            if not overlay:
+                self.main_image.paste(self.image, (x, y), self.image)
+                good_height = True
+                im_qual += 1
+                fail_count = 0
+            else:
+                fail_count += 1
+                
 
-                                print(1)
+            #print("NOT GOOD HEIGHT")
 
-
-            print("NOT GOOD HEIGHT")
 
 if __name__ == "__main__":
     # try:
