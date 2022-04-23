@@ -296,10 +296,11 @@ class Ui_MainWindow(object):
 
                 print(c)
                 self.main_image.show()
+                print(*self.main_image_matrix, sep='\n')
 
             #print("NOT GOOD HEIGHT")
         print('DONE!')
-        #print(*self.main_image_matrix, sep='\n')
+
 
 
 if __name__ == "__main__":
