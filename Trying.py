@@ -214,7 +214,7 @@ class Ui_MainWindow(object):
         #
         c = 0
         tried = False
-        for image_quality in range(int(5)):
+        for image_quality in range(int(70)):
             c += 1
             # ------------------------------------------------------------------------------------------
             # --------------------------------------RANDOM EDITING--------------------------------------
@@ -262,7 +262,7 @@ class Ui_MainWindow(object):
             good_height = False
             im_qual = 0
             while not good_height and y >= 0:
-                matrix_copy = self.main_image_matrix
+                matrix_copy = self.main_image_matrix.copy()
                 overlay = False
                 fail_count = 0
                 for i in range(self.main_image_height):
@@ -273,33 +273,35 @@ class Ui_MainWindow(object):
                         if self.height > small_i >= 0 and self.width > small_j >= 0:
                             # print(i, j, small_i, small_j, '??', self.height, self.width)
                             # print('хоть что-то выведи')
-                            if not self.main_image_matrix[i][j] + self.image_matrix[small_i][small_j] == 2:
-                                 self.main_image_matrix[i][j] += self.image_matrix[small_i][small_j]
+                            if not self.main_image_matrix[i][j] == self.image_matrix[small_i][small_j] == 1:
+                                 self.main_image_matrix[i][j] = self.image_matrix[small_i][small_j]
 
                             else:
                                 overlay = True
                 if not overlay:
                     self.main_image.paste(self.image, (x, y), self.image)
-                    print('PASTED')
+                    #print('PASTED')
                     #print(*self.main_image_matrix, sep='\n')
-                    self.main_image.show()
                     good_height = True
                     im_qual += 1
                     fail_count = 0
                 else:
                     fail_count += 1
+                    print(self.main_image_matrix == matrix_copy) # rfrjuj abuf? ye djn rfr jy ,k'n hf,jnftn&&&
                     self.main_image_matrix = matrix_copy
-                    y -= 50
-                    print('nooo', image_quality)
+                    y -= 10
+                    #print('nooo', image_quality, 'cords: ', x, y)
                     tried = True
                     overlay = False
 
                 print(c)
-                self.main_image.show()
-                print(*self.main_image_matrix, sep='\n')
+
+                #print(*self.main_image_matrix, sep='\n')
 
             #print("NOT GOOD HEIGHT")
+        self.main_image.show()
         print('DONE!')
+        print(*self.main_image_matrix, sep='\n')
 
 
 
