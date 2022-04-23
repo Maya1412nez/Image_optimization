@@ -126,8 +126,8 @@ class Ui_MainWindow(object):
         self.quantity_label.setText(_translate("MainWindow", "Quantity"))
 
     def set_image(self):
-        self.main_image_width = 1200
-        self.main_image_height = 700
+        self.main_image_width = 500
+        self.main_image_height = 300
         self.main_image = Image.new('RGB', (self.main_image_width, self.main_image_height), (118, 255, 97))
 
         self.image = Image.open('image/Image.png')
@@ -143,7 +143,7 @@ class Ui_MainWindow(object):
         self.assist_image.paste(self.image, (0, 0), self.image)
         # self.assist_image.show()
         self.pixels = self.assist_image.load()
-        self.main_image_matrix = [[0 for i in range(self.main_image_height)] for j in range(self.main_image_width)]
+        self.main_image_matrix = [[0 for i in range(self.main_image_width)] for j in range(self.main_image_height)]
 
         # -------------------------------------------------------------------------------------------
         # ---------------------------------CROPPING, COUNTING SQUARE---------------------------------
@@ -212,7 +212,10 @@ class Ui_MainWindow(object):
         #
         #
         #
-        for image_quality in range(2):
+        c = 0
+        tried = False
+        for image_quality in range(int(5)):
+            c += 1
             # ------------------------------------------------------------------------------------------
             # --------------------------------------RANDOM EDITING--------------------------------------
             # ------------------------------------------------------------------------------------------
@@ -247,18 +250,19 @@ class Ui_MainWindow(object):
                     r, g, b = pixels[j, i]
                     if r != 118 and g != 255 and b != 97:  # if pix not green = if pix != None
                         self.image_matrix[i][j] = 1  # замена 0 на 1
-            print(*self.image_matrix, sep='\n')
+            #print(*self.image_matrix, sep='\n')
 
             # ------------------------------------------------------------------------------------------
             # -----------------------------------MAIN MATRIX UPDATING-----------------------------------
             # ------------------------------------------------------------------------------------------
             # transferring little matrix to big one for checking overlaying
 
-            matrix_copy = self.main_image_matrix
+
 
             good_height = False
             im_qual = 0
             while not good_height and y >= 0:
+                matrix_copy = self.main_image_matrix
                 overlay = False
                 fail_count = 0
                 for i in range(self.main_image_height):
@@ -267,23 +271,35 @@ class Ui_MainWindow(object):
                         small_i = i - y
                         small_j = j - x
                         if self.height > small_i >= 0 and self.width > small_j >= 0:
-                            print(i, j, small_i, small_j, '??', self.height, self.width)
+                            # print(i, j, small_i, small_j, '??', self.height, self.width)
                             # print('хоть что-то выведи')
-                            if self.main_image_matrix[i][j] == self.image_matrix[small_i][small_j] == 1:
-                                 overlay = True
+                            if not self.main_image_matrix[i][j] + self.image_matrix[small_i][small_j] == 2:
+                                 self.main_image_matrix[i][j] += self.image_matrix[small_i][small_j]
+
                             else:
-                                self.main_image_matrix[i][j] = self.image_matrix[small_i][small_j]
+                                overlay = True
                 if not overlay:
                     self.main_image.paste(self.image, (x, y), self.image)
+                    print('PASTED')
+                    #print(*self.main_image_matrix, sep='\n')
+                    self.main_image.show()
                     good_height = True
                     im_qual += 1
                     fail_count = 0
                 else:
                     fail_count += 1
+                    self.main_image_matrix = matrix_copy
+                    y -= 50
+                    print('nooo', image_quality)
+                    tried = True
+                    overlay = False
 
+                print(c)
+                self.main_image.show()
 
-                #print("NOT GOOD HEIGHT")
-            self.main_image.show()
+            #print("NOT GOOD HEIGHT")
+        print('DONE!')
+        #print(*self.main_image_matrix, sep='\n')
 
 
 if __name__ == "__main__":
