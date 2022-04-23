@@ -213,7 +213,8 @@ class Ui_MainWindow(object):
         #
         #
         c = 0
-        for image_quality in range(int(10)):
+        tried = False
+        for image_quality in range(int(5)):
             c += 1
             # ------------------------------------------------------------------------------------------
             # --------------------------------------RANDOM EDITING--------------------------------------
@@ -256,11 +257,12 @@ class Ui_MainWindow(object):
             # ------------------------------------------------------------------------------------------
             # transferring little matrix to big one for checking overlaying
 
-            matrix_copy = self.main_image_matrix
+
 
             good_height = False
             im_qual = 0
             while not good_height or y >= 0:
+                matrix_copy = self.main_image_matrix
                 overlay = False
                 fail_count = 0
                 for i in range(self.main_image_height):
@@ -273,11 +275,13 @@ class Ui_MainWindow(object):
                             # print('хоть что-то выведи')
                             if not self.main_image_matrix[i][j] == self.image_matrix[small_i][small_j] == 1:
                                  self.main_image_matrix[i][j] = self.image_matrix[small_i][small_j]
+
                             else:
                                 overlay = True
                 if not overlay:
                     self.main_image.paste(self.image, (x, y), self.image)
                     print('PASTED')
+                    #print(*self.main_image_matrix, sep='\n')
                     self.main_image.show()
                     good_height = True
                     im_qual += 1
@@ -285,7 +289,9 @@ class Ui_MainWindow(object):
                 else:
                     fail_count += 1
                     self.main_image_matrix = matrix_copy
-                    y -= 1
+                    y -= 50
+                    print('nooo', image_quality)
+                    tried = True
                     overlay = False
 
             print(c)
@@ -293,8 +299,8 @@ class Ui_MainWindow(object):
 
 
                 #print("NOT GOOD HEIGHT")
-        self.main_image.show()
         print('DONE!')
+        self.main_image.show()
 
 
 if __name__ == "__main__":
