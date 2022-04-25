@@ -12,6 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtGui import QIcon
 from PIL import Image
+import copy
 
 
 class Ui_MainWindow(object):
@@ -143,7 +144,7 @@ class Ui_MainWindow(object):
         self.assist_image.paste(self.image, (0, 0), self.image)
         # self.assist_image.show()
         self.pixels = self.assist_image.load()
-        self.main_image_matrix = [[0 for i in range(self.main_image_height)] for j in range(self.main_image_width)]
+        self.main_image_matrix = [[0 for i in range(self.main_image_width)] for j in range(self.main_image_height)]
 
         # -------------------------------------------------------------------------------------------
         # ---------------------------------CROPPING, COUNTING SQUARE---------------------------------
@@ -199,7 +200,7 @@ class Ui_MainWindow(object):
             (upper_left_coord[0], upper_left_coord[1], lower_right_coord[0], lower_right_coord[1]))
         self.image = self.image.crop(
             (upper_left_coord[0], upper_left_coord[1], lower_right_coord[0], lower_right_coord[1]))
-        # self.assist_image.show()
+        #self.assist_image.show()
         print(f'''Possible quality: {possible_quality}
 ''')
 
@@ -212,44 +213,100 @@ class Ui_MainWindow(object):
         #
         #
         #
-        # ------------------------------------------------------------------------------------------
-        # --------------------------------------RANDOM EDITING--------------------------------------
-        # ------------------------------------------------------------------------------------------
+        c = 0
+        tried = False
+        for image_quality in range(int(400)):
+            c += 1
+            # ------------------------------------------------------------------------------------------
+            # --------------------------------------RANDOM EDITING--------------------------------------
+            # ------------------------------------------------------------------------------------------
 
-        flip_degrees = [0, 90, 180, 270]  # список градусов поворота
-        degrees = choice(flip_degrees)  # выбор градуса поворота
+            flip_degrees = [0, 90, 180, 270]  # список градусов поворота
+            degrees = choice(flip_degrees)  # выбор градуса поворота
 
-        self.image = self.image.rotate(degrees, expand=True)  # поворот PNG изображения
-        self.assist_image = self.assist_image.rotate(
-            degrees,
-            expand=True)  # поворот того же изображения, но наложенного на зеленый фон (r = 118 and g = 255 and b = 97)
-        # self.assist_image.show()
-        self.image.show()
-        self.width, self.height = self.image.size  # переопределение размеров
-        self.cords = (randint(0, self.main_image_width - self.width)), (self.main_image_height - self.height)
-        x, y = 200, (self.main_image_height - self.height)
-        print(
-            f'''New random coordinates: {x, y}
-    New random flip degrees: {degrees}
-    ''')
+            self.image = self.image.rotate(degrees, expand=True)  # поворот PNG изображения
+            self.assist_image = self.assist_image.rotate(
+                degrees,
+                expand=True)  # поворот того же изображения, но наложенного на зеленый фон (r = 118 and g = 255 and b = 97)
+            #self.assist_image.show()
+            # self.image.show()
+            self.width, self.height = self.image.size  # переопределение размеров
+            print(self.image.size)
+            x, y = (randint(0, self.main_image_width - self.width)), (self.main_image_height - self.height)
+            print(x, y)
+            # x, y = 10, (self.main_image_height - self.height)
+            print(
+                f'''New random coordinates: {x, y}
+        New random flip degrees: {degrees}
+        ''')
 
-        # ------------------------------------------------------------------------------------------
-        # --------------------------------------TABLE CREATING--------------------------------------
-        # ------------------------------------------------------------------------------------------
+            # ------------------------------------------------------------------------------------------
+            # --------------------------------------TABLE CREATING--------------------------------------
+            # ------------------------------------------------------------------------------------------
 
-        pixels = self.assist_image.load()
-        self.image_matrix = [[0] * self.width for i in range(self.height)]  # создание матрицы с нулями
-        for i in range(self.height):
-            for j in range(self.width):
-                r, g, b = pixels[j, i]
-                if r != 118 and g != 255 and b != 97:  # if pix not green = if pix != None
-                    self.image_matrix[i][j] = 1  # замена 0 на 1
-        print(*self.image_matrix, sep='\n')
+            pixels = self.assist_image.load()
+            self.image_matrix = [[0] * self.width for i in range(self.height)]  # создание матрицы с нулями
+            for i in range(self.height):
+                for j in range(self.width):
+                    r, g, b = pixels[j, i]
+                    if r != 118 and g != 255 and b != 97:  # if pix not green = if pix != None
+                        self.image_matrix[i][j] = 1  # замена 0 на 1
+            #print(*self.image_matrix, sep='\n')
 
-        # ------------------------------------------------------------------------------------------
-        # -----------------------------------MAIN MATRIX UPDATING-----------------------------------
-        # ------------------------------------------------------------------------------------------
-        # transferring little matrix to big one for checking overlaying
+            # ------------------------------------------------------------------------------------------
+            # -----------------------------------MAIN MATRIX UPDATING-----------------------------------
+            # ------------------------------------------------------------------------------------------
+            # transferring little matrix to big one for checking overlaying
+
+
+
+            good_height = False
+            im_qual = 0
+            while not good_height and y >= 0:
+                matrix_copy = copy.deepcopy(self.main_image_matrix)
+                overlay = False
+                fail_count = 0
+                for i in range(self.main_image_height):
+                    for j in range(self.main_image_width):
+                        # ENTER
+                        small_i = i - y
+                        small_j = j - x
+                        if self.height > small_i >= 0 and self.width > small_j >= 0:
+                            # print(i, j, small_i, small_j, '??', self.height, self.width)
+                            # print('хоть что-то выведи')
+                            #print(i, j, small_i, small_j, self.main_image_height, self.main_image_width)
+                            if not self.main_image_matrix[i][j] == self.image_matrix[small_i][small_j] == 1:
+                                 self.main_image_matrix[i][j] = self.image_matrix[small_i][small_j]
+
+                            else:
+                                overlay = True
+                if not overlay:
+                    self.main_image.paste(self.image, (x, y), self.image)
+                    #self.main_image.show()
+                    #print('PASTED')
+                    #print(*self.main_image_matrix, sep='\n')
+                    good_height = True
+                    im_qual += 1
+                    fail_count = 0
+                else:
+                    fail_count += 1
+                    #print(self.main_image_matrix == matrix_copy) # rfrjuj abuf? ye djn rfr jy ,k'n hf,jnftn&&&
+                    #self.main_image.show()
+                    self.main_image_matrix = matrix_copy
+                    y -= 10
+                    #print('nooo', image_quality, 'cords: ', x, y)
+                    tried = True
+                    overlay = False
+
+                print(c)
+
+                #print(*self.main_image_matrix, sep='\n')
+
+            #print("NOT GOOD HEIGHT")
+        self.main_image.show()
+        print('DONE!')
+        print(*self.main_image_matrix, sep='\n')
+
 
 
 if __name__ == "__main__":
