@@ -1,0 +1,145 @@
+import copy
+
+from PIL import Image
+from random import randint, choice
+from functions import nested_checking
+
+
+class MainFuncs:
+    def __init__(self, canvas_width, canvas_height, file_name):
+        self.directory = 'check'
+        self.canvas_back_color = (0, 0, 255)
+        self.canvas_width = canvas_width
+        self.canvas_height = canvas_height
+        self.canvas = Image.new('RGBA', (self.canvas_width, self.canvas_height), (0, 255, 0, 0))
+        self.support_canvas = Image.new('RGB', (self.canvas_width, self.canvas_height), self.canvas_back_color)
+
+        self.image_back_color = (0, 255, 0)
+        self.image = Image.open(f'images/{file_name}')
+        self.width, self.height = self.start_sizes = self.image.size
+        self.support_image = Image.new('RGB', (self.width, self.height), self.image_back_color)
+        self.support_image.paste(self.image, (0, 0), self.image)
+
+        self.canvas_matrix = [[0 for _ in range(self.canvas_height)] for __ in range(self.canvas_width)]
+        self.image_matrix = [[0 for _ in range(self.height)] for __ in range(self.width)]
+        self.possible_quality = 0
+        self.current_X, self.current_Y = -1, -1  # not None for beauty )
+        self.flip_degrees = [0, 90, 180, 270]
+
+        self.im_quality = 0
+
+    def initial_processing(self):
+        if not self.image.size < self.canvas.size:
+            print('SizeError: image size < canvas size')
+            return 'SizeError: image size < canvas size'
+
+        pixels = self.support_image.load()
+        quality_ratio = 0.8  # коэффициент, определяющий максимальное кол-во изображений
+        image_square = 0
+        lower_right_coord = [None, None]  # lower right - L
+        upper_left_coord = [None, None]  # upper left - U:
+        # _  _  U  _  _  1  _  _  _  _  _
+        # _  _  _  _  _  1  _  _  _  _  _
+        # _  _  1  2  3  4  5  6  7  _  _
+        # _  _  1  _  _  2  _  _  3  _  _
+        # _  _  1  _  _  2  _  _  L  _  _
+
+        for i in range(self.width):
+            for j in range(self.height):
+                r, g, b = pixels[i, j]
+                if r != 118 and g != 255 and b != 97:  # if pix not green = if pix != None
+                    # -----------------------------
+                    image_square += 1
+                    # -----------------------------
+                    if upper_left_coord[0] is None:
+                        upper_left_coord[0] = i
+                    if upper_left_coord[1] is None:
+                        upper_left_coord[1] = j
+
+                    if lower_right_coord[0] is None:
+                        lower_right_coord[0] = i
+                    if lower_right_coord[1] is None:
+                        lower_right_coord[1] = j
+                    else:
+                        if upper_left_coord[0] > i:
+                            upper_left_coord = i
+                        if upper_left_coord[1] > j:
+                            upper_left_coord[1] = j
+
+                        if lower_right_coord[0] < i:
+                            lower_right_coord[0] = i
+                        if lower_right_coord[1] < j:
+                            lower_right_coord[1] = j
+                    # -----------------------------
+        self.image = self.image.crop(
+            (upper_left_coord[0], upper_left_coord[1], lower_right_coord[0], lower_right_coord[1]))
+        self.support_image = self.support_image.crop(
+            (upper_left_coord[0], upper_left_coord[1], lower_right_coord[0], lower_right_coord[1]))
+        self.possible_quality = self.canvas_width * self.canvas_height // image_square * quality_ratio
+
+    def random_editing(self):
+        self.current_X, self.current_Y = randint(0, self.canvas_width - self.width), \
+                                         randint(0, self.canvas_height - self.height)
+        degrees = choice(self.flip_degrees)
+        self.image = self.image.rotate(degrees, expand=True)
+        self.support_image = self.support_image.rotate(degrees, expand=True)
+
+    def image_matrix_creating(self):
+        self.width, self.height = self.support_image.size
+        pixels = self.support_image.load()
+        for i in range(self.height):
+            for j in range(self.width):
+                r, g, b = pixels[j, i]
+                # if pix color != {self.image_back_color}
+                if r != self.image_back_color[0] and g != self.image_back_color[1] and b != self.image_back_color[2]:
+                    self.image_matrix[i][j] = 1
+
+    def canvas_matrix_updating(self):
+        good_height = False
+        while not good_height and self.current_Y >= 0:
+            matrix_copy = copy.deepcopy(self.canvas_matrix)
+            overlay = False
+            for y in range(self.canvas_height):
+                for x in range(self.canvas_width):
+                    local_y = y - self.current_Y
+                    local_x = x - self.current_X
+                    if self.height > local_y >= 0 and self.width > local_x >= 0:
+                        if not self.canvas_matrix[y][x] == self.image_matrix[local_y][local_x] == 1:
+                            self.canvas_matrix[y][x] = self.image_matrix[local_y][local_x]
+                        else:
+                            overlay = True
+            if not overlay:
+                self.canvas.paste(self.image, (self.current_X, self.current_Y), self.image)
+                good_height = True
+                self.im_quality += 1
+            else:
+                self.current_Y -= 10
+                self.canvas_matrix = matrix_copy
+
+    def check(self):
+        self.width, self.height = self.image.size
+        self.canvas.save(f'{self.directory}/canvas.png')
+        self.support_canvas.save(f'{self.directory}/support_canvas.png')
+        self.image.save(f'{self.directory}/image.png')
+        self.support_image.save(f'{self.directory}/support_image.png')
+        print('start image sizes:', self.start_sizes)
+        print(f'sizes: canvas: {self.canvas_width} x {self.canvas_height}; image: {self.width} x {self.height}')
+        print(f'coordinates: X = {self.current_X}, Y = {self.current_Y}')
+        print()
+        # if nested_checking(self.image_matrix, 1):
+        #     for i in range(len(self.image_matrix)):
+        #         print(self.image_matrix[i], end='\n')
+
+
+def create_obj(canvas_w, canvas_h, image_name, image_quality):
+    im = MainFuncs(canvas_w, canvas_h, image_name)
+    im.initial_processing()
+    for i in range(image_quality):
+        im.random_editing()
+        im.image_matrix_creating()
+        im.canvas_matrix_updating()
+        im.check()
+
+
+canvas_wid, canvas_hei = 1000, 1000
+create_obj(canvas_wid, canvas_hei, 'table.png', 5)
